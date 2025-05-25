@@ -60,5 +60,32 @@ router.post("/update-password/:token",
     , authController.updatePasswordWithToken)
 
 
-router.get("/user",authenticate, authController.getUser)
+router.get("/user", authenticate, authController.getUser)
+
+
+//profiles
+
+router.put("/profile", authenticate,
+    body('userName')
+        .notEmpty().withMessage('name is required'),
+    body('email')
+        .isEmail().withMessage('invalid email'),
+    handleInputErrors,
+    authController.editProfile)
+
+
+router.put("/update-password", authenticate,
+    body('currentPassword')
+        .notEmpty().withMessage('current password is required'),
+    body('password')
+        .notEmpty().withMessage('password'),
+    handleInputErrors,
+    authController.updatePasswordCurrentUser)
+
+
+router.post("/check-password", authenticate,
+    body('password')
+        .notEmpty().withMessage('password'),
+    handleInputErrors,
+    authController.checkUser)
 export default router

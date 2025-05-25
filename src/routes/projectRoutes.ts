@@ -134,7 +134,7 @@ router.get('/:projectId/tasks/:taskId/notes',
     NoteController.getNotes
 )
 
-router.delete('/:projectId/tasks/:taskId/notes',
-    NoteController.getNotes
+router.delete('/:projectId/tasks/:taskId/notes/:noteId',
+    NoteController.deleteNote
 )
 export default router

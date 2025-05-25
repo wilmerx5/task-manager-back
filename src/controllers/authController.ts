@@ -180,7 +180,51 @@ export default {
 
     getUser: async (req: Request, res: Response) => {
         try {
-           return res.json(req.user)
+            return res.json(req.user)
+        }
+        catch (e) {
+            console.log(e)
+            res.status(500).json({ 'error': "server error", "msg": e.message })
+        }
+    },
+
+    editProfile: async (req: Request, res: Response) => {
+        const { userName, email } = req.body
+
+        const userExist = await User.findOne({ email })
+
+        if (userExist && userExist.id.toString() != req.user.id.toString()) {
+            return res.status(409).json({ msg: 'this email is already registered' })
+        }
+
+        try {
+            req.user.userName = userName
+            req.user.email = email
+
+            await req.user.save()
+            return res.send('updated profile')
+        }
+        catch (e) {
+            console.log(e)
+            res.status(500).json({ 'error': "server error", "msg": e.message })
+        }
+    },
+
+    updatePasswordCurrentUser: async (req: Request, res: Response) => {
+        const { currentPassword, password } = req.body
+
+        const user = await User.findById(req.user.id)
+
+        const isCurrentPasswordRight = await verifyPassword(user.password, currentPassword)
+
+        if (!isCurrentPasswordRight) {
+            return res.status(409).json({ msg: 'Your current password doesnt match' })
+        }
+        user.password = await hashPassword(password)
+
+        try {
+            await user.save()
+            return res.send('updated user')
         }
         catch (e) {
             console.log(e)
@@ -189,4 +233,23 @@ export default {
     },
 
 
+    checkUser: async (req: Request, res: Response) => {
+        const { password } = req.body
+
+        const user = await User.findById(req.user.id)
+
+        const isCurrentPasswordRight = await verifyPassword(user.password, password)
+
+        if (!isCurrentPasswordRight) {
+            return res.status(409).json({ msg: 'Your current password doesnt match' })
+        }
+
+        try {
+            return res.send('ok proceed')
+        }
+        catch (e) {
+            console.log(e)
+            res.status(500).json({ 'error': "server error", "msg": e.message })
+        }
+    },
 }
